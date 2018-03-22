@@ -20,68 +20,68 @@ namespace UploadCSV
                 {
                     document.LoadFromFile(ConfigurationManager.AppSettings["path"], ","); //path of the file
                     Worksheet worksheet = document.Workbook.Worksheets[0];
+                    var connectionString = ConfigurationManager.ConnectionStrings["csvFileContext"].ConnectionString;
 
-                        for (int row = 0; row <= worksheet.UsedRangeRowMax; row++)
+                    for (int row = 0; row <= worksheet.UsedRangeRowMax; row++)
+                    {
+                        using (SqlConnection connection = new SqlConnection(connectionString))
                         {
-                            var connectionString = ConfigurationManager.ConnectionStrings["csvFileContext"].ConnectionString;
-                            using (SqlConnection connection = new SqlConnection(connectionString))
+                            connection.Open();
+                            try
                             {
-                                connection.Open();
-                                try
-                                {
-                                    String insertCommand = string.Format(
-                                        "INSERT INTO crCashReceipt VALUES('{0}','{1}','{2}','{3}','{4}','{5}','{6}',{7},{8},{9},{10},'{11}','{12}','{13}','{14}','{15}', {16},'{17}')",
-                                        worksheet.Cell(row, 0).Value,
-                                        worksheet.Cell(row, 1).Value,
-                                        worksheet.Cell(row, 2).ValueAsExcelDisplays,
-                                        worksheet.Cell(row, 3).Value,
-                                        worksheet.Cell(row, 4).Value,
-                                        worksheet.Cell(row, 5).Value,
-                                        worksheet.Cell(row, 6).Value,
-                                        worksheet.Cell(row, 7).Value,
-                                        worksheet.Cell(row, 8).Value,
-                                        worksheet.Cell(row, 9).Value,
-                                        worksheet.Cell(row, 10).Value,
-                                        worksheet.Cell(row, 11).ValueAsExcelDisplays,
-                                        worksheet.Cell(row, 12).ValueAsExcelDisplays,
-                                        worksheet.Cell(row, 13).Value,
-                                        worksheet.Cell(row, 14).Value,
-                                        worksheet.Cell(row, 15).Value,
-                                        worksheet.Cell(row, 16).Value,
-                                        worksheet.Cell(row, 17).Value);
+                                String insertCommand = string.Format(
+                                    "INSERT INTO crCashReceipt VALUES('{0}','{1}','{2}','{3}','{4}','{5}','{6}',{7},{8},{9},{10},'{11}','{12}','{13}','{14}','{15}', {16},'{17}')",
+                                    worksheet.Cell(row, 0).Value,
+                                    worksheet.Cell(row, 1).Value,
+                                    worksheet.Cell(row, 2).ValueAsExcelDisplays,
+                                    worksheet.Cell(row, 3).Value,
+                                    worksheet.Cell(row, 4).Value,
+                                    worksheet.Cell(row, 5).Value,
+                                    worksheet.Cell(row, 6).Value,
+                                    worksheet.Cell(row, 7).Value,
+                                    worksheet.Cell(row, 8).Value,
+                                    worksheet.Cell(row, 9).Value,
+                                    worksheet.Cell(row, 10).Value,
+                                    worksheet.Cell(row, 11).ValueAsExcelDisplays,
+                                    worksheet.Cell(row, 12).ValueAsExcelDisplays,
+                                    worksheet.Cell(row, 13).Value,
+                                    worksheet.Cell(row, 14).Value,
+                                    worksheet.Cell(row, 15).Value,
+                                    worksheet.Cell(row, 16).Value,
+                                    worksheet.Cell(row, 17).Value);
 
-                                    ExecuteQueryWithoutResult(connection, insertCommand);
-                                }
-                                catch
-                                {
-                                    String insertCommand = string.Format(
-                                        "INSERT INTO crCashReceipt VALUES('{0}','{1}','{2}','{3}','{4}','{5}','{6}',{7},{8},{9},{10},'{11}','{12}','{13}','{14}','{15}', {16},'{17}')",
-                                        worksheet.Cell(row, 0).Value,
-                                        worksheet.Cell(row, 1).Value,
-                                        worksheet.Cell(row, 2).ValueAsExcelDisplays,
-                                        worksheet.Cell(row, 3).Value,
-                                        worksheet.Cell(row, 4).Value,
-                                        worksheet.Cell(row, 5).Value,
-                                        worksheet.Cell(row, 6).Value,
-                                        worksheet.Cell(row, 7).Value,
-                                        worksheet.Cell(row, 8).Value,
-                                        worksheet.Cell(row, 9).Value,
-                                        worksheet.Cell(row, 10).Value,
-                                        worksheet.Cell(row, 11).ValueAsExcelDisplays,
-                                        worksheet.Cell(row, 12).ValueAsExcelDisplays,
-                                        worksheet.Cell(row, 13).Value,
-                                        worksheet.Cell(row, 14).Value,
-                                        worksheet.Cell(row, 15).Value,
-                                        0, // because cFreight is null or empty
-                                        worksheet.Cell(row, 17).Value);
-
-                                    ExecuteQueryWithoutResult(connection, insertCommand);
-                                }
+                                ExecuteQueryWithoutResult(connection, insertCommand);
                             }
+                            catch
+                            {
+                                String insertCommand = string.Format(
+                                    "INSERT INTO crCashReceipt VALUES('{0}','{1}','{2}','{3}','{4}','{5}','{6}',{7},{8},{9},{10},'{11}','{12}','{13}','{14}','{15}', {16},'{17}')",
+                                    worksheet.Cell(row, 0).Value,
+                                    worksheet.Cell(row, 1).Value,
+                                    worksheet.Cell(row, 2).ValueAsExcelDisplays,
+                                    worksheet.Cell(row, 3).Value,
+                                    worksheet.Cell(row, 4).Value,
+                                    worksheet.Cell(row, 5).Value,
+                                    worksheet.Cell(row, 6).Value,
+                                    worksheet.Cell(row, 7).Value,
+                                    worksheet.Cell(row, 8).Value,
+                                    worksheet.Cell(row, 9).Value,
+                                    worksheet.Cell(row, 10).Value,
+                                    worksheet.Cell(row, 11).ValueAsExcelDisplays,
+                                    worksheet.Cell(row, 12).ValueAsExcelDisplays,
+                                    worksheet.Cell(row, 13).Value,
+                                    worksheet.Cell(row, 14).Value,
+                                    worksheet.Cell(row, 15).Value,
+                                    0, // because cFreight is null or empty
+                                    worksheet.Cell(row, 17).Value);
 
-                            Console.WriteLine();
-                            Console.WriteLine($"Uploaded data: {row + 1}");
+                                ExecuteQueryWithoutResult(connection, insertCommand);
+                            }
                         }
+
+                        Console.WriteLine();
+                        Console.WriteLine($"Uploaded data: {row + 1}");
+                    }
 
                     Console.WriteLine();
                     Console.WriteLine("Successfully uploaded");
