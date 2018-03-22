@@ -14,38 +14,21 @@ namespace UploadCSV
         #region IMPORT CSV FILE TO THE DATABASE
         static void Main(string[] args)
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["csvFileContext"].ConnectionString;
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            try
             {
-                try
+                using (Spreadsheet document = new Spreadsheet())
                 {
-                    connection.Open();
-                    #region DATABASE QUERY
-                    //// Drop test database if exists
-                    //ExecuteQueryWithoutResult(connection, "IF DB_ID('CSV_FILE_TEST') IS NOT NULL DROP DATABASE CSV_FILE");
-                    //// Create empty database
-                    //ExecuteQueryWithoutResult(connection, "CREATE DATABASE CSV_FILE_TEST");
+                    document.LoadFromFile(ConfigurationManager.AppSettings["path"], ","); //path of the file
+                    Worksheet worksheet = document.Workbook.Worksheets[0];
 
-                    // Switch to created database
-                    //ExecuteQueryWithoutResult(connection, "USE CSVtoDB"); // change "CSVtoDB" to database name
-
-                    //// Create a table for CSV data
-                    //ExecuteQueryWithoutResult(connection,
-                    //"CREATE TABLE [dbo].[cr_expences](iCtr INT,cCRCode CHAR(50),cExpenses CHAR(50),iCost DECIMAL(9, 2))");
-                    #endregion
-
-                    using (Spreadsheet document = new Spreadsheet())
+                    try
                     {
-                        //Console.WriteLine("Please wait...");
-
-                        document.LoadFromFile(ConfigurationManager.AppSettings["path"], ","); //path of the file
-
-                        Worksheet worksheet = document.Workbook.Worksheets[0];
-
-                        try
+                        for (int row = 0; row <= worksheet.UsedRangeRowMax; row++)
                         {
-                            for (int row = 0; row <= worksheet.UsedRangeRowMax; row++)
+                            var connectionString = ConfigurationManager.ConnectionStrings["csvFileContext"].ConnectionString;
+                            using (SqlConnection connection = new SqlConnection(connectionString))
                             {
+                                connection.Open();
                                 try
                                 {
                                     String insertCommand = string.Format(
@@ -70,7 +53,6 @@ namespace UploadCSV
                                         worksheet.Cell(row, 17).Value);
 
                                     ExecuteQueryWithoutResult(connection, insertCommand);
-
                                 }
                                 catch
                                 {
@@ -92,48 +74,39 @@ namespace UploadCSV
                                         worksheet.Cell(row, 13).Value,
                                         worksheet.Cell(row, 14).Value,
                                         worksheet.Cell(row, 15).Value,
-                                        0,                            // because cFreight is null or empty
+                                        0, // because cFreight is null or empty
                                         worksheet.Cell(row, 17).Value);
 
                                     ExecuteQueryWithoutResult(connection, insertCommand);
                                 }
-
-                                Console.WriteLine();
-                                Console.WriteLine($"Uploaded data: {row + 1}");
                             }
+
+                            Console.WriteLine();
+                            Console.WriteLine($"Uploaded data: {row + 1}");
                         }
-
-                        //catch (DbException exe)
-                        //{
-                        //    Console.WriteLine("Error: " + exe.Message);
-                        //    Console.ReadKey();
-                        //}
-
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine("Error: " + ex.Message);
-                            Console.ReadKey();
-                        }
-
-                        Console.WriteLine();
-                        Console.WriteLine("Successfully uploaded");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error: " + ex.Message);
                         Console.ReadKey();
                     }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Error: " + ex.Message);
+
+                    Console.WriteLine();
+                    Console.WriteLine("Successfully uploaded");
                     Console.ReadKey();
                 }
             }
-
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                Console.ReadKey();
+            }
         }
         static void ExecuteQueryWithoutResult(SqlConnection connection, string query)
         {
             using (SqlCommand command = new SqlCommand(query, connection))
             {
                 command.ExecuteNonQuery();
-                //command.ExecuteNonQueryAsync();
             }
         }
         #endregion
