@@ -21,8 +21,6 @@ namespace UploadCSV
                     document.LoadFromFile(ConfigurationManager.AppSettings["path"], ","); //path of the file
                     Worksheet worksheet = document.Workbook.Worksheets[0];
 
-                    try
-                    {
                         for (int row = 0; row <= worksheet.UsedRangeRowMax; row++)
                         {
                             var connectionString = ConfigurationManager.ConnectionStrings["csvFileContext"].ConnectionString;
@@ -84,12 +82,6 @@ namespace UploadCSV
                             Console.WriteLine();
                             Console.WriteLine($"Uploaded data: {row + 1}");
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Error: " + ex.Message);
-                        Console.ReadKey();
-                    }
 
                     Console.WriteLine();
                     Console.WriteLine("Successfully uploaded");
